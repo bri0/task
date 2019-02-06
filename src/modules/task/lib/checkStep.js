@@ -14,7 +14,8 @@ const checkStepFn = (step, meta) => {
 		cmd,
 		cwd,
 	} = step;
-	if (!cmd) return { runable: false, name };
+	const stepName = tools.template(name, meta);
+	if (!cmd) return { runable: false, name: stepName };
 	let runable = true;
 	if (when !== undefined) {
 		if (typeof (when) === 'string') {
@@ -23,14 +24,20 @@ const checkStepFn = (step, meta) => {
 			runable = when.every(w => !!tools.template(w, meta));
 		}
 	}
-	if (!runable) return { runable, name, cmd };
+	if (!runable) {
+		return {
+			runable,
+			name: stepName,
+			cmd,
+		};
+	}
 	let cmdTpl = cmd;
 	if (Array.isArray(cmd)) cmdTpl = cmd.join(' ');
 	const stepCmd = tools.template(cmdTpl, meta);
 	const stepCwd = tools.template(cwd, meta);
 	return {
 		runable,
-		name,
+		name: stepName,
 		cmd: stepCmd,
 		cwd: stepCwd,
 	};

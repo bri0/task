@@ -1,6 +1,7 @@
 const tools = require('./tools');
 const ojp = require('object-path');
 const os = require('os');
+const fs = require('fs');
 
 const tplData = {
 	generators: {},
@@ -13,12 +14,28 @@ const tplTools = {
 		tplData.generators[schema] = tools.generator(start);
 		return start;
 	},
+	/**
+	 * Set in to the cache
+	 *
+	 * @param {string} key
+	 * @param {Object} val
+	 */
 	set(key, val) {
 		tplData.mem[key] = val;
 	},
+	/**
+	 *
+	 * @param {string} key
+	 * @returns {Object}
+	 */
 	get(key) {
 		return ojp.get(tplData.mem, key, null);
 	},
+	/**
+	 *
+	 * @param {string} prog
+	 * @returns
+	 */
 	which(prog) {
 		try {
 			return tools.process.execSync(`which ${prog}`).toString().trim();
@@ -26,8 +43,19 @@ const tplTools = {
 			return '';
 		}
 	},
+	/**
+	 *
+	 * @param {string} err
+	 */
 	cancel(err) {
 		throw new Error(err);
+	},
+	/**
+	 *
+	 * @param {string} filename
+	 */
+	exists(filename) {
+		return fs.existsSync(filename);
 	},
 };
 

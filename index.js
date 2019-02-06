@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const start = require('./src');
-const _ = require('colors');
+require('colors');
 const { log } = require('./src/log');
 
 log.SetLevel(process.env.BRASK_LOG);

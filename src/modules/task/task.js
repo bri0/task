@@ -1,4 +1,5 @@
 const deepExtend = require('deep-extend');
+const ojp = require('object-path');
 
 /**
  * Enum for store in Step
@@ -11,6 +12,18 @@ const PIPETYPE = {
 	RAW: 2, // Store to tools.get('key')
 	JSON: 3, // Store to tools.get('key') as json
 	YAML: 4, // Store to tools.get('key') as yaml
+};
+
+/**
+ * Enum for task scope
+ * @readonly
+ * @enum {number}
+ */
+const TASKSCOPE = {
+	UNKNOWN: 0,
+	GLOBAL: 1, // In ~/.brask/modules/${name}.yaml
+	PROJECT: 2, // In ${rootDir}/root.yaml
+	SERVICE: 3, // In ${svcDir}/manifest.yaml
 };
 
 /** @typedef {object} Step
@@ -65,7 +78,8 @@ function mergeMetadata(me1, me2) {
  * @returns {Task | null}
  */
 function getTask(taskName, meta) {
-	const metaTask = meta.tasks[taskName];
+	/** @type {Task|null} */
+	const metaTask = ojp.get(meta.tasks, taskName);
 	if (!metaTask) return null;
 	const { steps } = metaTask;
 	const copySubsteps = { ...meta.substeps };
@@ -76,6 +90,7 @@ function getTask(taskName, meta) {
 
 module.exports = {
 	PIPETYPE,
+	TASKSCOPE,
 	mergeMetadata,
 	getTask,
 };

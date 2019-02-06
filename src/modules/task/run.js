@@ -1,3 +1,4 @@
+require('colors');
 const ojp = require('object-path');
 const checkStep = require('./lib/checkStep');
 const tools = require('../../tools');
@@ -32,20 +33,24 @@ const runFn = async (cwd, theTask, templateMeta) => {
 
 	if (!steps || steps.length <= 0) return;
 	for (let j = 0; j < steps.length; j += 1) {
-		const { runable, name, cmd, cwd } = checkStep(steps[j], theMeta);
-		if (runable) {
-			log.Info(`About to run step: ${(name || j).cyan}`);
-			log.Verbose(`Command: ${cmd.cyan}`);
-			if (cmd.indexOf('substeps.') === 0) {
+		const checkedStep = checkStep(steps[j], theMeta);
+		if (checkedStep.runable) {
+			log.Info(`About to run step: ${(checkedStep.name || j).toString().yellow}`);
+			log.Verbose(`Command: ${checkedStep.cmd.cyan}`);
+			if (checkedStep.cmd.indexOf('substeps.') === 0) {
 				/** @type {import('./task').Step[]} */
-				const substeps = ojp.get(theTask, cmd);
+				const substep = ojp.get(theTask, checkedStep.cmd);
+				if (!substep) throw new Error(`Substep ${checkedStep.cmd} not found.`);
+				if (!substep.steps || substep.steps.length === 0) {
+					throw new Error(`Substeps ${checkedStep.cmd} does not contains any step.`);
+				}
 				let broken = false;
-				for (let ssi = 0; ssi < substeps.length; ssi += 1) {
-					const substep = await checkStep(substeps[ssi], theMeta);
-					if (substep.runable) {
-						log.Info(`  About to run substep: ${(substep.name || ssi).cyan}`);
+				for (let ssi = 0; ssi < substep.steps.length; ssi += 1) {
+					const checkedSubstepStep = await checkStep(substep.steps[ssi], theMeta);
+					if (checkedSubstepStep.runable) {
+						log.Info(`  About to run substep: ${(checkedSubstepStep.name || ssi).cyan}`);
 						log.Verbose(`  Command: ${substep.cmd.cyan}`);
-						const { pipe, storeKey } = substeps[ssi];
+						const { pipe, storeKey } = substep.steps[ssi];
 						let opts = pipe ? pipeOptions : options;
 						if (substep.cwd) {
 							opts = { ...opts };
@@ -58,7 +63,7 @@ const runFn = async (cwd, theTask, templateMeta) => {
 						if (res.status !== 0) {
 							throw new Error('Stop due to non-sucessfull exit in sub step.');
 						}
-						if (substeps[ssi].break) {
+						if (substep.steps[ssi].break) {
 							log.Verbose('Stop due to break control');
 							broken = true;
 							break;
@@ -82,18 +87,18 @@ const runFn = async (cwd, theTask, templateMeta) => {
 							break;
 						}
 					} else {
-						log.Verbose(`  Ignore: ${substep.cmd}`.grey);
+						log.Verbose(`  Ignore: ${checkedSubstepStep.cmd}`.grey);
 					}
 				}
 				if (broken) break;
 			} else {
 				const { pipe, storeKey } = steps[j];
 				let opts = pipe ? pipeOptions : options;
-				if (cwd) {
+				if (checkedStep.cwd) {
 					opts = { ...opts };
-					opts.cwd = cwd;
+					opts.cwd = checkedStep.cwd;
 				}
-				const res = tools.process.spawnSync(cmd, opts);
+				const res = tools.process.spawnSync(checkedStep.cmd, opts);
 				if (res.status !== 0) {
 					throw new Error('Stop due to non-sucessfull exit in step.');
 				}
@@ -120,7 +125,7 @@ const runFn = async (cwd, theTask, templateMeta) => {
 				break;
 			}
 		} else {
-			log.Verbose(`Ignore: ${cmd}`.grey);
+			log.Verbose(`Ignore: ${checkedStep.cmd}`.grey);
 		}
 	}
 };

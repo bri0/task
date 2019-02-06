@@ -14,6 +14,7 @@ module.exports = async () => {
 		if (typeof modules[argv._[1]] === 'function') {
 			return modules[argv._[1]](argv);
 		}
+		throw new Error(`Task ${argv._[1]} not found.`);
 	}
 
 	return task(argv);

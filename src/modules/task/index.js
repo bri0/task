@@ -29,8 +29,8 @@ module.exports = async (argv) => {
 	/** @type boolean */
 	let module = false;
 
-	// Now if the first argv start with ., treat it as modules
-	if (taskCmds[0].startsWith('.')) {
+	// Now if the first argv start with ~, treat it as a global modules
+	if (taskCmds[0].startsWith('~')) {
 		module = true;
 		const moduleName = taskCmds.shift().substr(1);
 		const pkgFile = `${process.env.HOME}/.brask/modules/${moduleName}.yaml`;
