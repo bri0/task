@@ -66,4 +66,4 @@ const index = async function (argv) {
     const theMeta = TplTools.tplMeta(argv, rootDir, finalMetadata, svcMan.dir, gitSHA);
     return run(cwd, theTask, theMeta);
 }
-export = index;
+export default index;

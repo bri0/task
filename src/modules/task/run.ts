@@ -6,7 +6,7 @@ import * as ojp from 'object-path';
 import { spawnSync } from 'child_process';
 import * as yaml from 'js-yaml';
 
-export = async function runTask(cwd: string, theTask: Metadata.Task, tplData: TplTools.TemplateMeta) {
+export default async function runTask(cwd: string, theTask: Metadata.Task, tplData: TplTools.TemplateMeta) {
     const shell = true;
     const theData = tplData;
 

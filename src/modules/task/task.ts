@@ -126,8 +126,7 @@ export namespace Metadata {
          * @memberof Metadata
          */
         getTask(taskName: string): Task {
-            /** @type Task */
-            const metaTask = ojp.get(this.tasks, taskName);
+            const metaTask = <Task>ojp.get(this.tasks, taskName);
             if (!metaTask) return null;
             const { steps, env } = metaTask;
             const copyFlows = { ...this.flows };
