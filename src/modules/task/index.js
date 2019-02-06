@@ -1,12 +1,8 @@
-// const checkStep = require('./lib/checkStep');
 const tplTools = require('../../tpltools');
-// const deepExtend = require('deep-extend');
-// const yaml = require('js-yaml');
 const { log } = require('../../log');
 const tools = require('../../tools');
 const task = require('./task');
 const run = require('./run');
-// const fs = require('fs');
 
 /**
  * @param {import("minimist").ParsedArgs} argv
