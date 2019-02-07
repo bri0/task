@@ -2,18 +2,22 @@ import minimist from 'minimist';
 import version from './modules/version';
 import task from './modules/task'
 
-const argv = minimist(process.argv.slice(2));
+const cmdArgv = minimist(process.argv.slice(2));
 const modules = {
     version,
 };
 
-module.exports = async () => {
-    if (argv._[0] === '-') {
-        if (typeof modules[argv._[1]] === 'function') {
-            return modules[argv._[1]](argv);
+export default async function () {
+    if (cmdArgv._[0] === '-') {
+        const taskName = cmdArgv._[1];
+        switch (taskName) {
+            case "version":
+                return version();
+                break;
+            default:
+                throw new Error(`Task ${taskName} not found.`);
         }
-        throw new Error(`Task ${argv._[1]} not found.`);
     }
 
-    return task(argv);
+    return task(cmdArgv);
 };

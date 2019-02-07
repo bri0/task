@@ -10,21 +10,21 @@ import run from "./run";
  * @param argv
  * @return Promise
  */
-const index = async function (argv) {
+const index = async function (argv: any) {
     if (argv._.length < 1) {
         throw new Error('Require task name');
     }
     const taskCmds = <string[]>argv._;
 
-    let finalMetadata = <Metadata.Metadata>null;
-    let rootDir = <string>null;
-    let cwd = process.env.HOME;
+    let finalMetadata:Metadata.Metadata;
+    let rootDir = "";
+    let cwd = process.env.HOME || "";
     let module = false;
 
     // Now if the first argv start with ~, treat it as a global modules
     if (taskCmds[0].startsWith('~')) {
         module = true;
-        const moduleName = taskCmds.shift().substr(1);
+        const moduleName = (taskCmds.shift() || "").substr(1);
         const pkgFile = `${process.env.HOME}/.brask/modules/${moduleName}.yaml`;
         LOG.Verbose(`File path: ${pkgFile}`);
         const man = Tools.getManifest(pkgFile, false);
@@ -54,6 +54,7 @@ const index = async function (argv) {
         throw new Error('Require task name');
     }
 
+    LOG.Warn("af", finalMetadata);
     const theTask = finalMetadata.getTask(taskName);
     if (!theTask || !theTask.steps) {
         throw new Error('This task does not exist');

@@ -51,7 +51,7 @@ export namespace Metadata {
          * @returns {{runable: boolean, name?: string, cmd?: string, cwd?: string}}
          * @memberof Step
          */
-        checkStep(tplData) {
+        checkStep(tplData: any) {
             const stepName = Tools.template(this.name, tplData).toString();
             if (!this.cmd) return { runable: false, name: stepName };
             let runable = true;
@@ -130,6 +130,7 @@ export namespace Metadata {
             if (!metaTask) return null;
             const { steps, env } = metaTask;
             const copyFlows = { ...this.flows };
+            // @ts-ignore
             const flows = deepExtend(copyFlows, metaTask.flows);
             return new Task(steps, flows, env);
         }
@@ -150,8 +151,10 @@ export namespace Metadata {
      */
     export function mergedMetadata(me1: Metadata, me2: Metadata): Metadata {
         const copyTasks = { ...me1.tasks };
+        // @ts-ignore
         const tasks = deepExtend(copyTasks, me2.tasks || {});
         const copyflows = { ...me1.flows };
+        // @ts-ignore
         const flows = deepExtend(copyflows, me2.flows || {});
         return new Metadata(tasks, flows);
     }

@@ -2,7 +2,6 @@ import util from 'util';
 import path from 'path';
 import fs from 'fs';
 import * as yaml from 'js-yaml';
-import mkdirp from 'mkdirp';
 import _ from 'underscore';
 import { Metadata } from './modules/task/task';
 import { spawn, spawnSync, exec, execSync } from 'child_process';
@@ -20,7 +19,8 @@ export namespace Tools {
      * @returns {*}
      */
     function readYaml(file: string): any{
-        const res = yaml.loadAll(fs.readFileSync(file));
+        // @ts-ignore
+        const res = yaml.loadAll(fs.readFileSync(file).toString());
         if (res.length === 1) return res[0];
         return res;
     }
@@ -42,9 +42,8 @@ export namespace Tools {
             if (fs.existsSync(aPath)) {
                 const dir = path.dirname(aPath);
                 try {
-                    /** @type Metadata.Metadata */
                     const metadata = readYaml(aPath);
-                    return new Metadata.Manifest(dir, metadata);
+                    return new Metadata.Manifest(dir, <Metadata.Metadata>metadata);
                 } catch (e) {
                     throw new Error(`Malformed ${name}`);
                 }

@@ -1,7 +1,7 @@
 class Logger {
     constructor(public defaultLevel: LOG.LEVEL = LOG.LEVEL.INFO) {
     }
-    log(level: LOG.LEVEL, message: string, ...opts) {
+    log(level: LOG.LEVEL, message: string, ...opts: any[]) {
         if (level < this.defaultLevel) return;
         if (level < LOG.LEVEL.ERROR) {
             console.log(`${LOG.LEVEL[level]}: ${message}`, ...opts);
@@ -19,19 +19,19 @@ export namespace LOG {
         FATAL,
     }
     const logger = new Logger()
-    export function Verbose(message, ...opts) {
+    export function Verbose(message: string, ...opts: any[]) {
         logger.log(LEVEL.VERBOSE, message, ...opts);
     }
-    export function Info(message, ...opts) {
+    export function Info(message: string, ...opts: any[]) {
         logger.log(LEVEL.INFO, message, ...opts);
     }
-    export function Warn(message, ...opts) {
+    export function Warn(message: string, ...opts: any[]) {
         logger.log(LEVEL.WARNING, message, ...opts);
     }
-    export function Error(message, ...opts) {
+    export function Error(message: string, ...opts: any[]) {
         logger.log(LEVEL.ERROR, message, ...opts);
     }
-    export function Fatal(message, ...opts) {
+    export function Fatal(message: string, ...opts: any[]) {
         logger.log(LEVEL.FATAL, message, ...opts);
         process.exit(1);
     }

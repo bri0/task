@@ -30,10 +30,10 @@ export default async function runTask(cwd: string, theTask: Metadata.Task, tplDa
         const checkedStep = steps[j].checkStep(theData);
         if (checkedStep.runable) {
             LOG.Info(`About to run step: ${(checkedStep.name || j).toString().yellow}`);
-            LOG.Verbose(`Command: ${checkedStep.cmd.cyan}`);
-            if (checkedStep.cmd.indexOf(Metadata.FlowPrefix) === 0) {
+            LOG.Verbose(`Command: ${(checkedStep.cmd || "").cyan}`);
+            if ((checkedStep.cmd || "").indexOf(Metadata.FlowPrefix) === 0) {
                 // In the case that cmd refer to a flow
-                const flow = <Metadata.Flow>ojp.get(theTask, checkedStep.cmd);
+                const flow = <Metadata.Flow>ojp.get(theTask, checkedStep.cmd || "");
                 if (!flow) throw new Error(`Flow ${checkedStep.cmd} not found.`);
                 if (!flow || flow.length === 0) {
                     throw new Error(`Flow ${checkedStep.cmd} does not contains any step.`);
@@ -43,17 +43,15 @@ export default async function runTask(cwd: string, theTask: Metadata.Task, tplDa
                     const checkedFlow = await flow[ssi].checkStep(theData);
                     if (checkedFlow.runable) {
                         LOG.Info(`  About to run substep: ${(checkedFlow.name || ssi.toString()).cyan}`);
-                        LOG.Verbose(`  Command: ${checkedFlow.cmd.cyan}`);
+                        LOG.Verbose(`  Command: ${(checkedFlow.cmd || "").cyan}`);
                         const { pipe, storeKey } = flow[ssi];
                         let opts = pipe ? pipeOptions : options;
                         if (checkedFlow.cwd) {
                             opts = { ...opts };
                             opts.cwd = checkedFlow.cwd;
                         }
-                        const res = spawnSync(
-                            checkedFlow.cmd,
-                            opts,
-                        );
+                        // @ts-ignore
+                        const res = spawnSync(checkedFlow.cmd || "", opts);
                         if (res.status !== 0) {
                             throw new Error('Stop due to non-sucessfull exit in sub step.');
                         }
@@ -92,7 +90,8 @@ export default async function runTask(cwd: string, theTask: Metadata.Task, tplDa
                     opts = { ...opts };
                     opts.cwd = checkedStep.cwd;
                 }
-                const res = spawnSync(checkedStep.cmd, opts);
+                // @ts-ignore
+                const res = spawnSync(checkedStep.cmd || "", opts);
                 if (res.status !== 0) {
                     throw new Error('Stop due to non-sucessfull exit in step.');
                 }
