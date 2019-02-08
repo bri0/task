@@ -1,13 +1,11 @@
 import { existsSync } from "fs";
 import { execSync } from "child_process";
-import * as ojp from "object-path";
-// import * as ojp from "object-path";
 import { Metadata } from "./modules/task/task";
 import * as theTools from "./tools";
 import os from 'os';
 
 const tplData = {
-    mem: {},
+    mem: new Map<string, any>(),
 }
 
 export namespace TplTools {
@@ -20,7 +18,7 @@ export namespace TplTools {
          * @param {*} val
          */
         set(key: string="", val: any): void {
-            tplData.mem[key] = val;
+            tplData.mem.set(key, val);
         },
         /**
          * Get cache
@@ -30,7 +28,7 @@ export namespace TplTools {
          * @returns {*}
          */
         get(key: string=""): any{
-            return tplData.mem[key];
+            return tplData.mem.get(key);
         },
         /**
          * Check if a binary exist or not by which command
@@ -79,17 +77,18 @@ export namespace TplTools {
      * @returns {TemplateMeta}
      */
     export function tplMeta(argv: any, rootDir: string, metadata: Metadata.Metadata, svcDir: string, gitSHA: string): TemplateMeta {
-        const vars = <Map<string,any>>ojp.get(metadata, 'vars', {});
-        const theMeta = new TemplateMeta(argv, Date.now(), process.env, os, null, null);
+        const { vars } = metadata;
+
+        let svcDirFromRoot: string = '';
+        if (svcDir !== '' && rootDir !== '') {
+            svcDirFromRoot = (svcDir || '').split(rootDir)[1];
+        }
+
+        const metaProject = new TemplateMeta_Project(rootDir, svcDir, svcDirFromRoot, gitSHA);
+
+        const theMeta = new TemplateMeta(argv, Date.now(), process.env, os, vars, metaProject);
         const tplVars = theTools.Tools.deepTemplate(vars, theMeta);
         theMeta.vars = tplVars;
-
-        theMeta.project = new TemplateMeta_Project(rootDir, svcDir, null, gitSHA);
-
-        if (svcDir !== '' && rootDir !== '') {
-            const svcDirFromRoot = (svcDir || '').split(rootDir)[1];
-            theMeta.project.svcDirFromRoot = svcDirFromRoot;
-        }
 
         return theMeta;
     }
@@ -111,7 +110,7 @@ export namespace TplTools {
     }
     export class TemplateMeta {
         public tools = Tools;
-        public pipe: string
+        public pipe: string = "";
         /**
          *Creates an instance of TemplateMeta.
          * @param {ParsedArgs} argv args of command line tool

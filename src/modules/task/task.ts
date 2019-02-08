@@ -1,6 +1,6 @@
-import * as deepExtend from 'deep-extend';
-import * as ojp from 'object-path';
 import { Tools } from '../../tools';
+import { JSONObject } from '../../lib/json';
+import _ from 'underscore';
 
 export namespace Metadata {
     export enum PIPETYPE {
@@ -85,7 +85,11 @@ export namespace Metadata {
             };
         }
     }
-    export type Flow = Step[]
+    export type Flow = Array<Step>
+    export type FlowValue = Flow | FlowObject
+    export interface FlowObject {
+        [x: string]: FlowValue
+    }
     /**
      * A task, with steps
      * @property env map of environment variable
@@ -103,20 +107,42 @@ export namespace Metadata {
          */
         constructor(
             public steps: Flow,
-            public flows: Flow,
+            public flows: FlowObject,
             public env: Map<string,string>,
         ) {}
+        getFlow(cmd: string | undefined): Flow | undefined{
+            if (!cmd) return;
+            const flowTree = cmd.split('.');
+            let currentFLow = this.flows;
+            while (flowTree.length > 0) {
+                const tn = flowTree.shift();
+                if (!tn) return;
+                const fl = currentFLow[tn];
+                if (_.isArray(fl)) {
+                    return <Flow>fl;
+                }
+                currentFLow = <FlowObject>fl;
+            }
+            return;
+        };
+
+    }
+    export type TaskValue = Task | TaskObject
+    export interface TaskObject {
+        [x: string]: TaskValue,
     }
     export class Metadata {
         /**
          *Creates an instance of Metadata.
-         * @param {Map<string,Task>} tasks
-         * @param {Map<string,Flow>} flows
+         * @param {TaskObject} tasks
+         * @param {FlowObject} [flows]
+         * @param {JSONObject} [vars]
          * @memberof Metadata
          */
         constructor(
-            public tasks: Map<string,Task>,
-            public flows: Map<string,Flow>,
+            public tasks: TaskObject,
+            public flows?: FlowObject,
+            public vars?: JSONObject,
         ) {}
         /**
          * Get a task from metadata, common flows from the meta will be overwrite by flows in task
@@ -125,20 +151,39 @@ export namespace Metadata {
          * @returns {Task}
          * @memberof Metadata
          */
-        getTask(taskName: string): Task {
-            const metaTask = <Task>ojp.get(this.tasks, taskName);
-            if (!metaTask) return null;
+        getTask(taskName: string): Task | undefined {
+            const taskTree = taskName.split('.');
+            let tskVal = this.tasks;
+            let metaTask: Task | undefined;
+            while (taskTree.length > 0) {
+                const tn = taskTree.shift();
+                if (!tn) return;
+                const tsk = tskVal[tn];
+                if (tsk instanceof Task) {
+                    metaTask = tsk;
+                    break;
+                }
+                tskVal = tsk;
+            }
+            if (!metaTask) return;
             const { steps, env } = metaTask;
             const copyFlows = { ...this.flows };
-            // @ts-ignore
-            const flows = deepExtend(copyFlows, metaTask.flows);
+            const flows = { ...copyFlows, ...metaTask.flows }
             return new Task(steps, flows, env);
         }
     }
     export class Manifest {
+        /**
+         *Creates an instance of Manifest.
+         * @param {string} dir directory of the manifest
+         * @param {Metadata} metadata
+         * @param {JSONObject} raw
+         * @memberof Manifest
+         */
         constructor(
             public dir: string,
             public metadata: Metadata,
+            public raw: JSONObject,
         ) {}
     }
     /**
@@ -150,12 +195,30 @@ export namespace Metadata {
      * @returns {Metadata}
      */
     export function mergedMetadata(me1: Metadata, me2: Metadata): Metadata {
-        const copyTasks = { ...me1.tasks };
-        // @ts-ignore
-        const tasks = deepExtend(copyTasks, me2.tasks || {});
-        const copyflows = { ...me1.flows };
-        // @ts-ignore
-        const flows = deepExtend(copyflows, me2.flows || {});
-        return new Metadata(tasks, flows);
+        let tasks = <TaskObject>{};
+        if (me1.tasks) {
+            tasks = { ...me1.tasks };
+        }
+        if (me2.tasks) {
+            tasks = { ...tasks, ...me2.tasks };
+        }
+
+        let flows = <FlowObject>{}
+        if (me1.flows) {
+            flows = { ...me1.flows }
+        }
+        if (me2.flows) {
+            flows = { ...flows, ...me2.flows };
+        }
+
+        let vars = <JSONObject>{}
+        if (me1.vars) {
+            vars = { ...me1.vars };
+        }
+        if (me2.vars) {
+            vars  = { ...vars, ...me2.vars };
+        }
+        const res = new Metadata(tasks, flows, vars);
+        return res;
     }
 }

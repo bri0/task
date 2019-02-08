@@ -2,7 +2,6 @@ import 'colors';
 import { Metadata } from './task';
 import { TplTools } from "../../tplTools";
 import { LOG } from '../../log';
-import * as ojp from 'object-path';
 import { spawnSync } from 'child_process';
 import * as yaml from 'js-yaml';
 
@@ -33,7 +32,7 @@ export default async function runTask(cwd: string, theTask: Metadata.Task, tplDa
             LOG.Verbose(`Command: ${(checkedStep.cmd || "").cyan}`);
             if ((checkedStep.cmd || "").indexOf(Metadata.FlowPrefix) === 0) {
                 // In the case that cmd refer to a flow
-                const flow = <Metadata.Flow>ojp.get(theTask, checkedStep.cmd || "");
+                const flow = theTask.getFlow((checkedStep.cmd || "").substr(Metadata.FlowPrefix.length));
                 if (!flow) throw new Error(`Flow ${checkedStep.cmd} not found.`);
                 if (!flow || flow.length === 0) {
                     throw new Error(`Flow ${checkedStep.cmd} does not contains any step.`);

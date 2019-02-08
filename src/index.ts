@@ -3,9 +3,6 @@ import version from './modules/version';
 import task from './modules/task'
 
 const cmdArgv = minimist(process.argv.slice(2));
-const modules = {
-    version,
-};
 
 export default async function () {
     if (cmdArgv._[0] === '-') {

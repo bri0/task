@@ -4,8 +4,10 @@ import 'colors';
 import start from './src'
 import { LOG } from './src/log';
 
-const envLogLevel = LOG.LEVEL[process.env.BRASK_LOG || ''];
-if (envLogLevel) {
+const envColorStr = process.env.BRASK_LOG;
+if (envColorStr) {
+    const colorStr = envColorStr as keyof typeof LOG.LEVEL;
+    const envLogLevel = LOG.LEVEL[colorStr];
     LOG.SetLevel(envLogLevel);
 }
 
