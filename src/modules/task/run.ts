@@ -26,9 +26,9 @@ export default async function runTask(cwd: string, theTask: Metadata.Task, tplDa
 
     if (!steps || steps.length <= 0) return;
     for (let j = 0; j < steps.length; j += 1) {
-        const checkedStep = steps[j].checkStep(theData);
+        const checkedStep = Metadata.stepify(steps[j]).checkStep(theData);
         if (checkedStep.runable) {
-            LOG.Info(`About to run step: ${(checkedStep.name || j).toString().yellow}`);
+            LOG.Info(`About to run step: ${(checkedStep.name || j).toString().cyan}`);
             LOG.Verbose(`Command: ${(checkedStep.cmd || "").cyan}`);
             if ((checkedStep.cmd || "").indexOf(Metadata.FlowPrefix) === 0) {
                 // In the case that cmd refer to a flow

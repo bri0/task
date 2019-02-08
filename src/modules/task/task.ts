@@ -23,6 +23,9 @@ export namespace Metadata {
      * @export
      * @class Step
      */
+    export function stepify(s: Step): Step {
+        return new Step(s.name, s.cmd, s.when, s.stop, s.pipe, s.storeKey, s.cwd);
+    }
     export class Step {
         /**
          *Creates an instance of Step.
@@ -118,9 +121,8 @@ export namespace Metadata {
                 const tn = flowTree.shift();
                 if (!tn) return;
                 const fl = currentFLow[tn];
-                if (_.isArray(fl)) {
-                    return <Flow>fl;
-                }
+                if (!fl) return;
+                if (flowTree.length === 0) return <Flow>fl;
                 currentFLow = <FlowObject>fl;
             }
             return;
@@ -159,11 +161,12 @@ export namespace Metadata {
                 const tn = taskTree.shift();
                 if (!tn) return;
                 const tsk = tskVal[tn];
-                if (tsk instanceof Task) {
-                    metaTask = tsk;
+                if (!tsk) return;
+                if (taskTree.length === 0) {
+                    metaTask = <Task>tsk;
                     break;
                 }
-                tskVal = tsk;
+                tskVal = <TaskObject>tsk;
             }
             if (!metaTask) return;
             const { steps, env } = metaTask;
