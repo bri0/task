@@ -24,7 +24,11 @@ export namespace Metadata {
      * @class Step
      */
     export function stepify(s: Step): Step {
-        return new Step(s.name, s.cmd, s.when, s.stop, s.pipe, s.storeKey, s.cwd);
+        if (s.pipe !== undefined) {
+            const pipeStr = s.pipe.toString() as keyof typeof PIPETYPE;
+            return new Step(s.name, s.cmd, s.when, s.stop, PIPETYPE[pipeStr], s.storeKey, s.cwd);
+        }
+        return new Step(s.name, s.cmd, s.when, s.stop, PIPETYPE.UNKNOWN, s.storeKey, s.cwd);
     }
     export class Step {
         /**
@@ -105,13 +109,13 @@ export namespace Metadata {
          *Creates an instance of Task.
          * @param {Flow} steps Run step by step
          * @param {Map<string,Flow>} flows To be called in step's cmd with flows., merge and overwrite by flows in metadata
-         * @param {Map<string,string>} env Environment variable to run this task
+         * @param {NodeJS.ProcessEnv} env Environment variable to run this task
          * @memberof Task
          */
         constructor(
             public steps: Flow,
             public flows: FlowObject,
-            public env: Map<string,string>,
+            public env: NodeJS.ProcessEnv,
         ) {}
         getFlow(cmd: string | undefined): Flow | undefined{
             if (!cmd) return;
@@ -122,12 +126,22 @@ export namespace Metadata {
                 if (!tn) return;
                 const fl = currentFLow[tn];
                 if (!fl) return;
-                if (flowTree.length === 0) return <Flow>fl;
+                if (flowTree.length === 0) {
+                    const flow = <Flow>fl;
+                    const steps: Step[] = [];
+                    for (const s of flow) {
+                        steps.push(stepify(s));
+                    }
+                    return steps;
+                }
                 currentFLow = <FlowObject>fl;
             }
             return;
         };
 
+    }
+    export function taskify(t: Task): Task {
+        return new Task(t.steps, t.flows, t.env);
     }
     export type TaskValue = Task | TaskObject
     export interface TaskObject {

@@ -2,20 +2,24 @@ import 'colors';
 import { Metadata } from './task';
 import { TplTools } from "../../tplTools";
 import { LOG } from '../../log';
-import { spawnSync } from 'child_process';
+import { spawnSync, SpawnSyncOptions } from 'child_process';
 import * as yaml from 'js-yaml';
 
 export default async function runTask(cwd: string, theTask: Metadata.Task, tplData: TplTools.TemplateMeta) {
+    // const theTask = Metadata.taskify(task);
+    // console.log(theTask.getFlow('flows.check-buildtool'));
+    // console.log(task.getFlow('flows.check-buildtool'));
+
     const shell = true;
     const theData = tplData;
 
-    const options = {
+    const options: SpawnSyncOptions = {
         stdio: 'inherit',
         cwd,
         shell,
         env: { ...process.env, ...theTask.env },
     };
-    const pipeOptions = {
+    const pipeOptions: SpawnSyncOptions = {
         stdio: ['inherit', 'pipe', 'inherit'],
         cwd,
         shell,
@@ -49,7 +53,6 @@ export default async function runTask(cwd: string, theTask: Metadata.Task, tplDa
                             opts = { ...opts };
                             opts.cwd = checkedFlow.cwd;
                         }
-                        // @ts-ignore
                         const res = spawnSync(checkedFlow.cmd || "", opts);
                         if (res.status !== 0) {
                             throw new Error('Stop due to non-sucessfull exit in sub step.');
@@ -89,7 +92,7 @@ export default async function runTask(cwd: string, theTask: Metadata.Task, tplDa
                     opts = { ...opts };
                     opts.cwd = checkedStep.cwd;
                 }
-                // @ts-ignore
+
                 const res = spawnSync(checkedStep.cmd || "", opts);
                 if (res.status !== 0) {
                     throw new Error('Stop due to non-sucessfull exit in step.');

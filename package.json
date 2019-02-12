@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc --build tsconfig.json",
     "watch": "tsc --build tsconfig.json -w",
     "precomit": "misc/git/create-pre-commit-file",
     "test": "mocha src/**/*.test.js --reporter spec"
@@ -24,21 +24,12 @@
   "dependencies": {
     "camelcase": "^4.1.0",
     "colors": "^1.3.2",
-    "columnify": "^1.5.4",
     "deep-extend": "^0.5.1",
     "es6-template": "^1.0.4",
-    "fuzzy": "^0.1.3",
-    "inquirer": "^5.2.0",
     "js-yaml": "^3.12.0",
     "minimist": "^1.2.0",
     "mkdirp": "^0.5.1",
-    "object-path": "^0.11.4",
     "pascal-case": "^2.0.1",
-    "repl": "^0.1.3",
-    "repl.history": "^0.1.4",
-    "request": "^2.88.0",
-    "request-promise-native": "^1.0.5",
-    "tarjan-graph": "^1.0.1",
     "underscore": "^1.9.1"
   },
   "devDependencies": {
