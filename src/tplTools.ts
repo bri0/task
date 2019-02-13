@@ -1,6 +1,7 @@
 import { existsSync } from "fs";
 import { execSync } from "child_process";
 import { Metadata } from "./modules/task/task";
+import * as inquirer from "inquirer";
 import * as theTools from "./tools";
 import os from 'os';
 
@@ -107,7 +108,10 @@ export namespace TplTools {
             public svcDirFromRoot: string,
             public gitSHA: string,
         ) {}
-    }
+	}
+	export const Inquiry = {
+
+	}
     export class TemplateMeta {
         public tools = Tools;
         public pipe: string = "";

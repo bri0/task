@@ -6,7 +6,7 @@ import _ from 'underscore';
 import { Metadata } from './modules/task/task';
 import { spawn, spawnSync, exec, execSync } from 'child_process';
 import { JSONValue, JSONObject } from './lib/json';
-import { stringify } from 'querystring';
+import { TplTools } from './tplTools';
 
 const templReg = /^<%(.*)%([ifbIFB]?)>$/;
 const execPromise = util.promisify(exec);
@@ -84,7 +84,7 @@ export namespace Tools {
      * @param {*} obj
      * @returns {string|boolean|number}
      */
-    export function template(str: string = '', obj: any): string | boolean | number {
+    export function template(str: string = '', obj: TplTools.TemplateMeta): string | boolean | number {
         const regRes = str.match(templReg);
         if (regRes) {
             const liter = _.template(`<%${regRes[1]}%>`)(obj);
@@ -108,7 +108,7 @@ export namespace Tools {
      * @param {*} obj
      * @returns
      */
-    export function deepTemplate(templ: JSONValue | undefined, obj: any): JSONValue {
+    export function deepTemplate(templ: JSONValue | undefined, obj: TplTools.TemplateMeta): JSONValue {
         if (!templ) return <JSONObject>{};
         if (typeof templ === 'number' || typeof templ === 'boolean') return templ;
 

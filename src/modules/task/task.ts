@@ -1,6 +1,9 @@
 import { Tools } from '../../tools';
-import { JSONObject } from '../../lib/json';
+import { JSONObject, JSONArray } from '../../lib/json';
 import _ from 'underscore';
+import { Question } from 'inquirer';
+import { TplTools } from '../../tplTools';
+import inquirer = require('inquirer');
 
 export namespace Metadata {
     export enum PIPETYPE {
@@ -26,9 +29,9 @@ export namespace Metadata {
     export function stepify(s: Step): Step {
         if (s.pipe !== undefined) {
             const pipeStr = s.pipe.toString() as keyof typeof PIPETYPE;
-            return new Step(s.name, s.cmd, s.when, s.stop, PIPETYPE[pipeStr], s.storeKey, s.cwd);
+            return new Step(s.name, s.cmd, s.when, s.stop, PIPETYPE[pipeStr], s.storeKey, s.cwd, s.inquiries);
         }
-        return new Step(s.name, s.cmd, s.when, s.stop, PIPETYPE.UNKNOWN, s.storeKey, s.cwd);
+        return new Step(s.name, s.cmd, s.when, s.stop, PIPETYPE.UNKNOWN, s.storeKey, s.cwd, s.inquiries);
     }
     export class Step {
         /**
@@ -49,8 +52,31 @@ export namespace Metadata {
             public stop: boolean,
             public pipe: PIPETYPE,
             public storeKey: string,
-            public cwd: string,
-        ) {}
+			public cwd: string,
+			public inquiries: Question[],
+		) {}
+		async inquiry(tplData: TplTools.TemplateMeta) {
+			if (!this.inquiries) return;
+			if (this.inquiries.length === 0) return;
+			const jsonInqs = <JSONArray>Tools.deepTemplate(<JSONArray>this.inquiries, tplData);
+			const inquiries: Question[] = [];
+			for (const key in <JSONArray>this.inquiries) {
+				const element = <JSONObject>jsonInqs[key];
+				const q = <Question>element;
+				if (element['when']) {
+					q.when = eval(`(answers) => ${element.when}`);
+				}
+				if (element['validate']) {
+					q.validate = eval(`(input) => ${element.validate}`);
+				}
+				inquiries.push(q);
+			}
+			const answers = await inquirer.prompt(inquiries);
+			for (const key in answers) {
+				const element = answers[key];
+				tplData.tools.set(`inquiry.${key}`, element);
+			}
+		}
         /**
          * Check step
          *
@@ -58,7 +84,7 @@ export namespace Metadata {
          * @returns {{runable: boolean, name?: string, cmd?: string, cwd?: string}}
          * @memberof Step
          */
-        checkStep(tplData: any) {
+        checkStep(tplData: TplTools.TemplateMeta) {
             const stepName = Tools.template(this.name, tplData).toString();
             if (!this.cmd) return { runable: false, name: stepName };
             let runable = true;

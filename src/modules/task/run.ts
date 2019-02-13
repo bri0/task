@@ -30,7 +30,11 @@ export default async function runTask(cwd: string, theTask: Metadata.Task, tplDa
 
     if (!steps || steps.length <= 0) return;
     for (let j = 0; j < steps.length; j += 1) {
-        const checkedStep = Metadata.stepify(steps[j]).checkStep(theData);
+		const theStep = Metadata.stepify(steps[j]);
+		// Perform inquiries
+		await theStep.inquiry(theData);
+
+		const checkedStep = theStep.checkStep(theData);
         if (checkedStep.runable) {
             LOG.Info(`About to run step: ${(checkedStep.name || j).toString().cyan}`);
             LOG.Verbose(`Command: ${(checkedStep.cmd || "").cyan}`);
@@ -43,6 +47,9 @@ export default async function runTask(cwd: string, theTask: Metadata.Task, tplDa
                 }
                 let broken = false;
                 for (let ssi = 0; ssi < flow.length; ssi += 1) {
+					// Inquiry
+					await flow[ssi].inquiry(theData);
+
                     const checkedFlow = await flow[ssi].checkStep(theData);
                     if (checkedFlow.runable) {
                         LOG.Info(`  About to run substep: ${(checkedFlow.name || ssi.toString()).cyan}`);
@@ -52,33 +59,12 @@ export default async function runTask(cwd: string, theTask: Metadata.Task, tplDa
                         if (checkedFlow.cwd) {
                             opts = { ...opts };
                             opts.cwd = checkedFlow.cwd;
-                        }
-                        const res = spawnSync(checkedFlow.cmd || "", opts);
-                        if (res.status !== 0) {
-                            throw new Error('Stop due to non-sucessfull exit in sub step.');
-                        }
+						}
+						taskExecute(checkedFlow.cmd, opts, pipe, storeKey, theData);
                         if (flow[ssi].stop) {
                             LOG.Verbose('Stop due to break control');
                             broken = true;
                             break;
-                        }
-                        const stdout = res.stdout && res.stdout.toString().trim();
-
-                        switch (pipe) {
-                            case Metadata.PIPETYPE.PIPE:
-                                theData.pipe = stdout;
-                                break;
-                            case Metadata.PIPETYPE.RAW:
-                                if (storeKey) theData.tools.set(storeKey, stdout);
-                                break;
-                            case Metadata.PIPETYPE.YAML:
-                                if (storeKey) theData.tools.set(storeKey, yaml.load(stdout));
-                                break;
-                            case Metadata.PIPETYPE.JSON:
-                                if (storeKey) theData.tools.set(storeKey, JSON.parse(stdout));
-                                break;
-                            default:
-                                break;
                         }
                     } else {
                         LOG.Verbose(`  Ignore: ${checkedFlow.cmd}`.grey);
@@ -91,29 +77,8 @@ export default async function runTask(cwd: string, theTask: Metadata.Task, tplDa
                 if (checkedStep.cwd) {
                     opts = { ...opts };
                     opts.cwd = checkedStep.cwd;
-                }
-
-                const res = spawnSync(checkedStep.cmd || "", opts);
-                if (res.status !== 0) {
-                    throw new Error('Stop due to non-sucessfull exit in step.');
-                }
-                const stdout = res.stdout && res.stdout.toString().trim();
-                switch (pipe) {
-                    case Metadata.PIPETYPE.PIPE:
-                        theData.pipe = stdout;
-                        break;
-                    case Metadata.PIPETYPE.RAW:
-                        if (storeKey) theData.tools.set(storeKey, stdout);
-                        break;
-                    case Metadata.PIPETYPE.YAML:
-                        if (storeKey) theData.tools.set(storeKey, yaml.load(stdout));
-                        break;
-                    case Metadata.PIPETYPE.JSON:
-                        if (storeKey) theData.tools.set(storeKey, JSON.parse(stdout));
-                        break;
-                    default:
-                        break;
-                }
+				}
+				taskExecute(checkedStep.cmd, opts, pipe,storeKey, theData);
             }
             if (steps[j].stop) {
                 LOG.Verbose('Stop due to break control');
@@ -123,4 +88,33 @@ export default async function runTask(cwd: string, theTask: Metadata.Task, tplDa
             LOG.Verbose(`Ignore: ${checkedStep.cmd}`.grey);
         }
     }
+}
+
+function taskExecute(
+	cmd: string="",
+	opts: SpawnSyncOptions,
+	pipe: Metadata.PIPETYPE,
+	storeKey: string,
+	theData: TplTools.TemplateMeta) {
+	const res = spawnSync(cmd || "", opts);
+	if (res.status !== 0) {
+		throw new Error('Stop due to non-sucessfull exit in step.');
+	}
+	const stdout = res.stdout && res.stdout.toString().trim();
+	switch (pipe) {
+		case Metadata.PIPETYPE.PIPE:
+			theData.pipe = stdout;
+			break;
+		case Metadata.PIPETYPE.RAW:
+			if (storeKey) theData.tools.set(storeKey, stdout);
+			break;
+		case Metadata.PIPETYPE.YAML:
+			if (storeKey) theData.tools.set(storeKey, yaml.load(stdout));
+			break;
+		case Metadata.PIPETYPE.JSON:
+			if (storeKey) theData.tools.set(storeKey, JSON.parse(stdout));
+			break;
+		default:
+			break;
+	}
 }
