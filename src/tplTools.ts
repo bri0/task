@@ -4,6 +4,7 @@ import { Metadata } from "./modules/task/task";
 import * as inquirer from "inquirer";
 import * as theTools from "./tools";
 import os from 'os';
+import { LOG } from "./log";
 
 const tplData = {
     mem: new Map<string, any>(),
@@ -54,7 +55,21 @@ export namespace TplTools {
          */
         cancel(errStr: string): never {
             throw new Error(errStr);
-        },
+		},
+		hasError(cmd: string, warn: string="", warn_on_error:boolean=true): boolean {
+			try  {
+				execSync(`${cmd} > /dev/null 2>&1`);
+				if (!warn_on_error && warn) {
+					LOG.Warn(warn.yellow);
+				}
+				return false;
+			} catch (e) {
+				if (warn_on_error && warn) {
+					LOG.Warn(warn.yellow);
+				}
+				return true;
+			}
+		},
         /**
          * Check if a filename exists
          *
@@ -64,7 +79,11 @@ export namespace TplTools {
          */
         exists(filename: string): boolean {
             return existsSync(filename);
-        },
+		},
+		replace(str: string, rpl: string = "", pattern: string, flags: string): string {
+			const reg = new RegExp(pattern, flags);
+			return str.replace(reg, rpl);
+		}
     }
     /**
      * Generate the template interpolation variables

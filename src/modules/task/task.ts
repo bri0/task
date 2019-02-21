@@ -107,7 +107,7 @@ export namespace Metadata {
                 cmdTpl = this.cmd;
             } else if (Array.isArray(this.cmd)) {
                 cmdTpl = this.cmd.join(' ');
-            }
+			}
             const stepCmd = Tools.template(cmdTpl, tplData).toString();
             const stepCwd = Tools.template(this.cwd, tplData).toString();
             return {

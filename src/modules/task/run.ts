@@ -52,7 +52,7 @@ export default async function runTask(cwd: string, theTask: Metadata.Task, tplDa
 
                     const checkedFlow = await flow[ssi].checkStep(theData);
                     if (checkedFlow.runable) {
-                        LOG.Info(`  About to run substep: ${(checkedFlow.name || ssi.toString()).cyan}`);
+                        LOG.Info(`  About to run flow: ${(checkedFlow.name || ssi.toString()).cyan}`);
                         LOG.Verbose(`  Command: ${(checkedFlow.cmd || "").cyan}`);
                         const { pipe, storeKey } = flow[ssi];
                         let opts = pipe ? pipeOptions : options;

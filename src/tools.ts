@@ -85,20 +85,25 @@ export namespace Tools {
      * @returns {string|boolean|number}
      */
     export function template(str: string = '', obj: TplTools.TemplateMeta): string | boolean | number {
-        const regRes = str.match(templReg);
-        if (regRes) {
-            const liter = _.template(`<%${regRes[1]}%>`)(obj);
-            const c = regRes[2];
-            if (c === 'i' || c === 'I') return parseInt(liter, 10);
-            if (c === 'f' || c === 'F') return parseFloat(liter);
-            if (c === 'b' || c === 'B') {
-                if (liter === 'true') return true;
-                if (liter === 'false') return false;
-                return !!liter;
-            }
-            return liter;
-        }
-        return _.template(str)(obj);
+		try {
+			const regRes = str.match(templReg);
+			if (regRes) {
+				const liter = _.template(`<%${regRes[1]}%>`)(obj);
+				const c = regRes[2];
+				if (c === 'i' || c === 'I') return parseInt(liter, 10);
+				if (c === 'f' || c === 'F') return parseFloat(liter);
+				if (c === 'b' || c === 'B') {
+					if (liter === 'true') return true;
+					if (liter === 'false') return false;
+					return !!liter;
+				}
+				return liter;
+			}
+			return _.template(str)(obj);
+		} catch (e) {
+			const err = <Error>e;
+			throw new Error(`Can not evaluate \`${str}\`: ${err.message}`);
+		}
     }
     /**
      * Deep template

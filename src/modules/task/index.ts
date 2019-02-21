@@ -32,7 +32,7 @@ const index = async function (argv: any) {
             throw new Error(`Can not find module ${moduleName}`);
         }
         finalMetadata = man.metadata;
-    } else {
+	} else {
         const man = Tools.getManifest('root.yaml');
         if (!man || !man.metadata) {
             throw new Error('Can not find root.yaml in any of parent folder');
