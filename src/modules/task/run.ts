@@ -38,48 +38,14 @@ export default async function runTask(cwd: string, theTask: Metadata.Task, tplDa
         if (checkedStep.runable) {
             LOG.Info(`About to run step: ${(checkedStep.name || j).toString().cyan}`);
             LOG.Verbose(`Command: ${(checkedStep.cmd || "").cyan}`);
-            if ((checkedStep.cmd || "").indexOf(Metadata.FlowPrefix) === 0) {
-                // In the case that cmd refer to a flow
-                const flow = theTask.getFlow((checkedStep.cmd || "").substr(Metadata.FlowPrefix.length));
-                if (!flow) throw new Error(`Flow ${checkedStep.cmd} not found.`);
-                if (!flow || flow.length === 0) {
-                    throw new Error(`Flow ${checkedStep.cmd} does not contains any step.`);
-                }
-                let broken = false;
-                for (let ssi = 0; ssi < flow.length; ssi += 1) {
-					// Inquiry
-					await flow[ssi].inquiry(theData);
+			const { pipe, storeKey } = theStep;
+			let opts = pipe ? pipeOptions : options;
+			if (checkedStep.cwd) {
+				opts = { ...opts };
+				opts.cwd = checkedStep.cwd;
+			}
+			taskExecute(checkedStep.cmd, opts, pipe,storeKey, theData);
 
-                    const checkedFlow = await flow[ssi].checkStep(theData);
-                    if (checkedFlow.runable) {
-                        LOG.Info(`  About to run flow: ${(checkedFlow.name || ssi.toString()).cyan}`);
-                        LOG.Verbose(`  Command: ${(checkedFlow.cmd || "").cyan}`);
-                        const { pipe, storeKey } = flow[ssi];
-                        let opts = pipe ? pipeOptions : options;
-                        if (checkedFlow.cwd) {
-                            opts = { ...opts };
-                            opts.cwd = checkedFlow.cwd;
-						}
-						taskExecute(checkedFlow.cmd, opts, pipe, storeKey, theData);
-                        if (flow[ssi].stop) {
-                            LOG.Verbose('Stop due to break control');
-                            broken = true;
-                            break;
-                        }
-                    } else {
-                        LOG.Verbose(`  Ignore: ${checkedFlow.cmd}`.grey);
-                    }
-                }
-                if (broken) break;
-            } else {
-                const { pipe, storeKey } = steps[j];
-                let opts = pipe ? pipeOptions : options;
-                if (checkedStep.cwd) {
-                    opts = { ...opts };
-                    opts.cwd = checkedStep.cwd;
-				}
-				taskExecute(checkedStep.cmd, opts, pipe,storeKey, theData);
-            }
             if (steps[j].stop) {
                 LOG.Verbose('Stop due to break control');
                 break;
@@ -98,7 +64,7 @@ function taskExecute(
 	theData: TplTools.TemplateMeta) {
 	const res = spawnSync(cmd || "", opts);
 	if (res.status !== 0) {
-		throw new Error('Stop due to non-sucessfull exit in step.');
+		throw new Error('Stop due to non-sucessfull exit in step');
 	}
 	const stdout = res.stdout && res.stdout.toString().trim();
 	switch (pipe) {

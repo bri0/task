@@ -16,14 +16,13 @@ function yaml2Manifest(dir: string, yml: any): Metadata.Manifest | undefined {
 
     if (!_.isObject(yml)) return;
     const oyml = <JSONObject>yml;
-    const { tasks, flows, vars } = oyml;
+    const { tasks, vars } = oyml;
     if (vars) {
         if (!_.isObject(vars)) throw new Error(`Vars of manifest in ${dir} is not an object`);
     }
 
     const metadata = new Metadata.Metadata(
         <Metadata.TaskObject>tasks,
-        <Metadata.FlowObject>flows,
         <JSONObject>vars,
     );
 

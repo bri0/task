@@ -19,7 +19,7 @@ export namespace Metadata {
         PROJECT, // In ${rootDir}/root.yaml
         SERVICE, // In ${svcDir}/manifest.yaml
     }
-    export const FlowPrefix = 'flows.';
+
     /**
      * A step that execute a command
      *
@@ -118,11 +118,6 @@ export namespace Metadata {
             };
         }
     }
-    export type Flow = Array<Step>
-    export type FlowValue = Flow | FlowObject
-    export interface FlowObject {
-        [x: string]: FlowValue
-    }
     /**
      * A task, with steps
      * @property env map of environment variable
@@ -131,43 +126,19 @@ export namespace Metadata {
      * @class Task
      */
     export class Task {
-        /**
-         *Creates an instance of Task.
-         * @param {Flow} steps Run step by step
-         * @param {Map<string,Flow>} flows To be called in step's cmd with flows., merge and overwrite by flows in metadata
-         * @param {NodeJS.ProcessEnv} env Environment variable to run this task
-         * @memberof Task
-         */
-        constructor(
-            public steps: Flow,
-            public flows: FlowObject,
-            public env: NodeJS.ProcessEnv,
-        ) {}
-        getFlow(cmd: string | undefined): Flow | undefined{
-            if (!cmd) return;
-            const flowTree = cmd.split('.');
-            let currentFLow = this.flows;
-            while (flowTree.length > 0) {
-                const tn = flowTree.shift();
-                if (!tn) return;
-                const fl = currentFLow[tn];
-                if (!fl) return;
-                if (flowTree.length === 0) {
-                    const flow = <Flow>fl;
-                    const steps: Step[] = [];
-                    for (const s of flow) {
-                        steps.push(stepify(s));
-                    }
-                    return steps;
-                }
-                currentFLow = <FlowObject>fl;
-            }
-            return;
-        };
-
-    }
+				/**
+				 *Creates an instance of Task.
+				 * @param {Array<Step>} steps Run step by step
+				 * @param {NodeJS.ProcessEnv} env Environment variable to run this task
+				 * @memberof Task
+				 */
+				constructor(
+					public steps: Array<Step>,
+					public env: NodeJS.ProcessEnv
+				) {}
+			}
     export function taskify(t: Task): Task {
-        return new Task(t.steps, t.flows, t.env);
+        return new Task(t.steps, t.env);
     }
     export type TaskValue = Task | TaskObject
     export interface TaskObject {
@@ -183,7 +154,6 @@ export namespace Metadata {
          */
         constructor(
             public tasks: TaskObject,
-            public flows?: FlowObject,
             public vars?: JSONObject,
         ) {}
         /**
@@ -210,9 +180,7 @@ export namespace Metadata {
             }
             if (!metaTask) return;
             const { steps, env } = metaTask;
-            const copyFlows = { ...this.flows };
-            const flows = { ...copyFlows, ...metaTask.flows }
-            return new Task(steps, flows, env);
+            return new Task(steps, env);
         }
     }
     export class Manifest {
@@ -246,14 +214,6 @@ export namespace Metadata {
             tasks = { ...tasks, ...me2.tasks };
         }
 
-        let flows = <FlowObject>{}
-        if (me1.flows) {
-            flows = { ...me1.flows }
-        }
-        if (me2.flows) {
-            flows = { ...flows, ...me2.flows };
-        }
-
         let vars = <JSONObject>{}
         if (me1.vars) {
             vars = { ...me1.vars };
@@ -261,7 +221,7 @@ export namespace Metadata {
         if (me2.vars) {
             vars  = { ...vars, ...me2.vars };
         }
-        const res = new Metadata(tasks, flows, vars);
+        const res = new Metadata(tasks, vars);
         return res;
     }
 }

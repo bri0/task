@@ -1,6 +1,6 @@
 {
   "name": "brask",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "Task controlling",
   "main": "dist/index.js",
   "types": "dist/index.d.js",
@@ -27,7 +27,7 @@
     "deep-extend": "^0.5.1",
     "es6-template": "^1.0.4",
     "inquirer": "^6.2.2",
-    "js-yaml": "^3.12.0",
+    "js-yaml": "3.13.1",
     "minimist": "^1.2.0",
     "mkdirp": "^0.5.1",
     "pascal-case": "^2.0.1",
