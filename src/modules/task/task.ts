@@ -148,7 +148,6 @@ export namespace Metadata {
         /**
          *Creates an instance of Metadata.
          * @param {TaskObject} tasks
-         * @param {FlowObject} [flows]
          * @param {JSONObject} [vars]
          * @memberof Metadata
          */

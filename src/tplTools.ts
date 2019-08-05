@@ -1,10 +1,12 @@
 import { existsSync } from "fs";
 import { execSync } from "child_process";
 import { Metadata } from "./modules/task/task";
-import * as inquirer from "inquirer";
 import * as theTools from "./tools";
 import os from 'os';
 import { LOG } from "./log";
+import camelCase from "camelcase";
+import pascalCase from "pascal-case";
+import { JSONObject } from "./lib/json";
 
 const tplData = {
     mem: new Map<string, any>(),
@@ -83,6 +85,14 @@ export namespace TplTools {
 		replace(str: string, rpl: string = "", pattern: string, flags: string): string {
 			const reg = new RegExp(pattern, flags);
 			return str.replace(reg, rpl);
+		},
+		camelCase,
+		pascalCase,
+		templateFile(tplFile: string, inp: JSONObject, outputFile: string) {
+			let tplFunc: (inp: JSONObject) => string;
+			tplFunc = require(tplFile);
+			const output = tplFunc.bind(TplTools.Tools)(inp);
+			theTools.Tools.writeFile(outputFile, output);
 		}
     }
     /**
@@ -96,7 +106,7 @@ export namespace TplTools {
      * @param {string} gitSHA sha of current git head commit
      * @returns {TemplateMeta}
      */
-    export function tplMeta(argv: any, rootDir: string, metadata: Metadata.Metadata, svcDir: string, gitSHA: string): TemplateMeta {
+    export function tplMeta(argv: any, rootDir: string, metadata: Metadata.Metadata, svcDir: string, gitSHA: string, rootman: JSONObject, svcman: JSONObject): TemplateMeta {
         const { vars } = metadata;
 
         let svcDirFromRoot: string = '';
@@ -106,7 +116,7 @@ export namespace TplTools {
 
         const metaProject = new TemplateMeta_Project(rootDir, svcDir, svcDirFromRoot, gitSHA);
 
-        const theMeta = new TemplateMeta(argv, Date.now(), process.env, os, vars, metaProject);
+        const theMeta = new TemplateMeta(argv, Date.now(), process.env, os, vars, metaProject, rootman, svcman);
         const tplVars = theTools.Tools.deepTemplate(vars, theMeta);
         theMeta.vars = tplVars;
 
@@ -150,7 +160,9 @@ export namespace TplTools {
             public env: NodeJS.ProcessEnv,
             public os: any,
             public vars: any,
-            public project: TemplateMeta_Project,
+			public project: TemplateMeta_Project,
+			public rootman: JSONObject,
+			public svcman: JSONObject,
         ) {
         }
     }

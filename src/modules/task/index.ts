@@ -16,10 +16,11 @@ const index = async function (argv: any) {
     }
     const taskCmds = <string[]>argv._;
 
-    let finalMetadata:Metadata.Metadata;
+    let finalMetadata: Metadata.Metadata;
     let rootDir = "";
     let cwd = process.env.HOME || "";
-    let module = false;
+	let module = false;
+	let man: Metadata.Manifest | undefined;
 
     // Now if the first argv start with ~, treat it as a global modules
     if (taskCmds[0].startsWith('~')) {
@@ -27,21 +28,21 @@ const index = async function (argv: any) {
         const moduleName = (taskCmds.shift() || "").substr(1);
         const pkgFile = `${process.env.HOME}/.brask/modules/${moduleName}.yaml`;
         LOG.Verbose(`File path: ${pkgFile}`);
-        const man = Tools.getManifest(pkgFile, false);
+        man = Tools.getManifest(pkgFile, false);
         if (!man || !man.metadata) {
             throw new Error(`Can not find module ${moduleName}`);
         }
         finalMetadata = man.metadata;
 	} else {
-        const man = Tools.getManifest('root.yaml');
+        man = Tools.getManifest('root.yaml');
         if (!man || !man.metadata) {
             throw new Error('Can not find root.yaml in any of parent folder');
         }
         LOG.Verbose(`File path: ${man.dir}`);
         cwd = man.dir;
         rootDir = man.dir;
-        finalMetadata = man.metadata;
-    }
+		finalMetadata = man.metadata;
+	}
 
     const svcMan = Tools.getManifest('manifest.yaml');
     if (svcMan && svcMan.metadata) {
@@ -67,7 +68,7 @@ const index = async function (argv: any) {
 
     const gitSHA = execSync('git rev-parse --short HEAD', { cwd }).toString().trim();
 
-    const theMeta = TplTools.tplMeta(argv, rootDir, finalMetadata, svcManDir, gitSHA);
+    const theMeta = TplTools.tplMeta(argv, rootDir, finalMetadata, svcManDir, gitSHA, man.raw, svcMan ? svcMan.raw : {});
     return run(cwd, theTask, theMeta);
 }
 

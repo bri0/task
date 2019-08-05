@@ -4,5 +4,6 @@
     },
     "files.exclude": {
         "**/dist": true
-    }
+    },
+    "workbench.colorCustomizations": {}
 }

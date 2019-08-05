@@ -7,6 +7,7 @@ import { Metadata } from './modules/task/task';
 import { spawn, spawnSync, exec, execSync } from 'child_process';
 import { JSONValue, JSONObject } from './lib/json';
 import { TplTools } from './tplTools';
+import mkdirp from "mkdirp";
 
 const templReg = /^<%(.*)%([ifbIFB]?)>$/;
 const execPromise = util.promisify(exec);
@@ -138,6 +139,20 @@ export namespace Tools {
             return res;
         }
         return templ;
-    }
+	}
+	export function mkdir(dir: string): boolean {
+		if (!fs.existsSync(dir)) {
+			mkdirp.sync(dir);
+			return true;
+		}
+		return false;
+	}
+	export function writeFile(f: string, data: any) {
+		const dir = path.dirname(f);
+		if (!fs.existsSync(dir)) {
+			Tools.mkdir(dir)
+		}
+		return fs.writeFileSync(f, data);
+	}
 }
 
