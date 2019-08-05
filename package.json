@@ -1,6 +1,6 @@
 {
   "name": "brask",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Task controlling",
   "main": "dist/index.js",
   "types": "dist/index.d.js",
@@ -8,7 +8,9 @@
     "build": "tsc --build tsconfig.json",
     "watch": "tsc --build tsconfig.json -w",
     "precomit": "misc/git/create-pre-commit-file",
-    "test": "mocha src/**/*.test.js --reporter spec"
+    "test": "snyk test && mocha src/**/*.test.js --reporter spec",
+    "snyk-protect": "snyk protect",
+    "prepare": "yarn run snyk-protect"
   },
   "keywords": [
     "task"
@@ -32,7 +34,8 @@
     "minimist": "^1.2.0",
     "mkdirp": "^0.5.1",
     "pascal-case": "^2.0.1",
-    "underscore": "^1.9.1"
+    "underscore": "^1.9.1",
+    "snyk": "^1.111.1"
   },
   "devDependencies": {
     "@types/deep-extend": "^0.4.31",
@@ -48,5 +51,6 @@
     "eslint-plugin-import": "^2.14.0",
     "mocha": "^5.2.0",
     "typescript": "~3.2.4"
-  }
+  },
+  "snyk": true
 }
