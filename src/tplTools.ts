@@ -1,4 +1,4 @@
-import { existsSync } from "fs";
+import { existsSync, writeFileSync, appendFileSync } from "fs";
 import { execSync } from "child_process";
 import { Metadata } from "./modules/task/task";
 import * as theTools from "./tools";
@@ -23,7 +23,7 @@ export namespace TplTools {
          */
         set(key: string="", val: any): void {
             tplData.mem.set(key, val);
-        },
+		},
         /**
          * Get cache
          *
@@ -82,6 +82,8 @@ export namespace TplTools {
         exists(filename: string): boolean {
             return existsSync(filename);
 		},
+		writeFileSync,
+		appendFileSync,
 		replace(str: string, rpl: string = "", pattern: string, flags: string): string {
 			const reg = new RegExp(pattern, flags);
 			return str.replace(reg, rpl);
