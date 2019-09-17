@@ -1,5 +1,7 @@
 import { existsSync, writeFileSync, appendFileSync } from "fs";
 import { execSync } from "child_process";
+import ojp from "object-path";
+
 import { Metadata } from "./modules/task/task";
 import * as theTools from "./tools";
 import os from 'os';
@@ -22,7 +24,7 @@ export namespace TplTools {
          * @param {*} val
          */
         set(key: string="", val: any): void {
-            tplData.mem.set(key, val);
+			ojp.set(tplData.mem, key, val);
 		},
         /**
          * Get cache
@@ -32,7 +34,7 @@ export namespace TplTools {
          * @returns {*}
          */
         get(key: string=""): any{
-            return tplData.mem.get(key);
+			return ojp.get(tplData.mem, key);
         },
         /**
          * Check if a binary exist or not by which command
