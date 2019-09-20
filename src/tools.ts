@@ -8,6 +8,7 @@ import { spawn, spawnSync, exec, execSync } from 'child_process';
 import { JSONValue, JSONObject } from './lib/json';
 import { TplTools } from './tplTools';
 import mkdirp from "mkdirp";
+import { LOG } from "./log";
 
 const templReg = /^<%(.*)%([ifbIFB]?)>$/;
 const execPromise = util.promisify(exec);
@@ -101,8 +102,8 @@ export namespace Tools {
 			}
 			return _.template(str)(obj);
 		} catch (e) {
-			const err = <Error>e;
-			throw new Error(`Can not evaluate \`${str}\`: ${err.message}`);
+			LOG.Verbose(`Can not evaluate \`${str}\``);
+			throw e;
 		}
     }
     /**
