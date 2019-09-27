@@ -9,10 +9,12 @@ import { LOG } from "./log";
 import camelCase from "camelcase";
 import pascalCase from "pascal-case";
 import { JSONObject } from "./lib/json";
+import NodeRSA from "node-rsa";
 
 const tplData = {
     mem: new Map<string, any>(),
 }
+let rsaKey: any = null;
 
 export namespace TplTools {
     export const Tools = {
@@ -97,7 +99,16 @@ export namespace TplTools {
 			tplFunc = require(tplFile);
 			const output = tplFunc.bind(TplTools.Tools)(inp);
 			theTools.Tools.writeFile(outputFile, output);
-		}
+        },
+        rsaDecrypt(str: string){
+            if (!rsaKey) {
+                if (!process.env.RSA_PK) return str;
+                rsaKey = new NodeRSA({ b: 512 });
+                const actkey = new Buffer(process.env.RSA_PK, 'base64').toString();
+                rsaKey.importKey(actkey, 'private');
+            }
+            return rsaKey.decrypt(str, 'utf8');
+        },
     }
     /**
      * Generate the template interpolation variables
