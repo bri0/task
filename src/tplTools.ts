@@ -14,7 +14,6 @@ import NodeRSA from "node-rsa";
 const tplData = {
     mem: new Map<string, any>(),
 }
-let rsaKey: any = null;
 
 export namespace TplTools {
     export const Tools = {
@@ -100,14 +99,18 @@ export namespace TplTools {
 			const output = tplFunc.bind(TplTools.Tools)(inp);
 			theTools.Tools.writeFile(outputFile, output);
         },
-        rsaDecrypt(str: string){
-            if (!rsaKey) {
-                if (!process.env.RSA_PK) return str;
-                rsaKey = new NodeRSA({ b: 512 });
-                const actkey = new Buffer(process.env.RSA_PK, 'base64').toString();
-                rsaKey.importKey(actkey, 'private');
-            }
-            return rsaKey.decrypt(str, 'utf8');
+        rsaDecrypt(base64RsaPk: string, base64EncryptedStr: string): string{
+            const rsa = new NodeRSA({ b: 512 });
+            const prtkey = Buffer.from(base64RsaPk, 'base64').toString();
+            rsa.importKey(prtkey, 'private');
+			const decryptedBase64 = rsa.decrypt(base64EncryptedStr, 'base64');
+			return Buffer.from(decryptedBase64, 'base64').toString();
+        },
+        rsaEncrypt(base64RsaPub: string, encryptingStr: string): string{
+            const rsa = new NodeRSA({ b: 512 });
+			const pubkey = Buffer.from(base64RsaPub, 'base64').toString();
+            rsa.importKey(pubkey, 'public');
+            return rsa.encrypt(encryptingStr, 'base64');
         },
     }
     /**
