@@ -13,5 +13,5 @@ if (envColorStr) {
 
 start().catch((err) => {
     LOG.Verbose(err.stack);
-    LOG.Error(err.toString().red);
+    LOG.Fatal(err.toString().red);
 });
