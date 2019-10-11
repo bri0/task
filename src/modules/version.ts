@@ -1,5 +1,5 @@
-import * as versionJson from "../../version.json";
+import * as pkgjson from "../../package.json";
 
 export default async function () {
-    console.log(versionJson.version);
+    console.log(pkgjson.version);
 }

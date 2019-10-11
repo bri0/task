@@ -1,8 +1,13 @@
+import { execSync } from "child_process";
+import semver from "semver";
+import ojp from "object-path";
+
 import { LOG } from "../../log";
 import { Tools } from "../../tools";
 import { Metadata } from "./task";
-import { execSync } from "child_process";
 import { TplTools } from "../../tplTools";
+import { version } from "../../../package.json";
+
 import run from "./run";
 
 /**
@@ -44,12 +49,18 @@ const index = async function (argv: any) {
 		finalMetadata = man.metadata;
 	}
 
+	const requiredVersion: string = ojp.get(man.raw, "requiredVersion");
+	if (requiredVersion && !semver.satisfies(version, requiredVersion)) {
+		throw new Error(`Current brask version ${version} does not satisfy require ${requiredVersion}. Please consider to update ${'npm up -g brask '}`);
+	}
+
     const svcMan = Tools.getManifest('manifest.yaml');
     if (svcMan && svcMan.metadata) {
         finalMetadata = Metadata.mergedMetadata(finalMetadata, svcMan.metadata);
         cwd = svcMan.dir;
     }
-    let svcManDir = "";
+
+	let svcManDir = "";
     if (svcMan) {
         svcManDir = svcMan.dir;
     }

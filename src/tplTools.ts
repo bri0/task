@@ -36,7 +36,9 @@ export namespace TplTools {
          */
         get(key: string=""): any{
 			return ojp.get(tplData.mem, key);
-        },
+		},
+		getPath: ojp.get,
+		setPath: ojp.set,
         /**
          * Check if a binary exist or not by which command
          *
