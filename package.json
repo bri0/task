@@ -1,6 +1,6 @@
 {
   "name": "brask",
-  "version": "1.1.10",
+  "version": "1.1.11",
   "description": "Task controlling",
   "main": "dist/index.js",
   "types": "dist/index.d.js",
