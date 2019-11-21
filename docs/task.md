@@ -90,14 +90,14 @@ Example of `pipe`:
 
 ```yaml
 tasks:
- example_of_pipe:
- steps:
- - name: piping
- cmd: echo '{"a": [{},{"foo": "bar"}]}'
- pipe: JSON
- storeKey: pipe.example
- - name: get pipe
- cmd: echo <%=tools.get('pipe.example.a.1.foo')%>
+  example_of_pipe:
+    steps:
+    - name: piping
+      cmd: echo '{"a": [{},{"foo": "bar"}]}'
+      pipe: JSON
+      storeKey: pipe.example
+    - name: get pipe
+      cmd: echo <%=tools.get('pipe.example.a.1.foo')%>
 ```
 
 This will output "bar"
