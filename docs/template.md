@@ -1,6 +1,6 @@
 # Templating
 
-Templating is uses inside configuration to give it more flexibility. Template compile inline javascript and render complicated logic in various form.
+Templating is used inside configuration to give it more flexibility. Template compile inline javascript and render complicated logic in various forms.
 
 ## Basic templating format
 
@@ -23,10 +23,10 @@ In a yaml file, you can set result of the templating into `integer`, `boolean` o
 
 ```yaml
 vars:
-  integer: <%= 1 %i>
-  boolean: <%= 1 %b>
-  float: <%= 1.0 %f>
-  other: Hello <%= name %>
+ integer: <%= 1 %i>
+ boolean: <%= 1 %b>
+ float: <%= 1.0 %f>
+ other: Hello <%= name %>
 ```
 
 In the example above, `integer`, `boolean`, `float` can be parsed into another format instead of a string, while `other` can not.
@@ -43,7 +43,7 @@ In the example above, `integer`, `boolean`, `float` can be parsed into another f
 
 `project.svcDir` is the absolute path to the root directory of the current service, only available in service scope.
 
-`project.svcDirFromRoot` is the relative path of the current service from the project root folder,  and unavailable outside of service scope.
+`project.svcDirFromRoot` is the relative path of the current service from the project root folder, and unavailable outside of service scope.
 
 ### Argv
 
@@ -60,14 +60,14 @@ Results
 
 ```yaml
 argv:
-  _: [task, foo, bar, baz]
-  x: 3
-  y: 4
-  n: 5
-  a: true
-  b: true
-  c: true
-  beep: boop
+ _: [task, foo, bar, baz]
+ x: 3
+ y: 4
+ n: 5
+ a: true
+ b: true
+ c: true
+ beep: boop
 ```
 
 `env` is the object let you access to the environment variables
@@ -94,13 +94,13 @@ Will set `env.cluster` to `prod`
 
 ### VARS
 
-`vars` is the object from the manifest file, and different depend on the scope
+`vars` is the object from the manifest file, and is different depending on the scope
 
 `no-scope` has no `vars`
 
 In `project scope`, `vars` is the object copied from `/vars` from `root.yaml`
 
-In `service scope`, `vars` is the result of merging `/vars` from `manifest.yaml` with the one in `root.yaml`. Value of the same key in `manifest.yaml` will overwrite `root.yaml`.
+In `service scope`, `vars` is the result of merging `/vars` from `manifest.yaml` with the one in `root.yaml`. The value of the same key in `manifest.yaml` will overwrite `root.yaml`.
 
 ### Manifest
 
@@ -109,7 +109,7 @@ In `service scope`, `vars` is the result of merging `/vars` from `manifest.yaml`
 
 ## Tools
 
-Template providing `tools` you can use to make things easier
+The template provides `tools` you can use to make things easier
 
 ### Value caching
 
@@ -117,7 +117,7 @@ Template providing `tools` you can use to make things easier
 
 The behavior of `get` and `set` is [documented here](https://github.com/mariocasciaro/object-path#usage)
 
-Other function of a `step`, like `inquiries` or `pipe` also storing data into cache.
+Other functions of a `step`, like `inquiries` or `pipe` also storing data into the cache.
 
 ### Object Path
 
@@ -142,7 +142,7 @@ Here is a sample of template file:
 
 ```javascript
 module.exports = function (input) {
-    return `
+ return `
 FROM alpine:3.10
 
 RUN apk --no-cache add ca-certificates tzdata && update-ca-certificates
@@ -160,7 +160,7 @@ USER brask
 
 ### String manipulation
 
-`tools.camelCase`, `tools.pascalCase` are tools to change case of the input string as their names show.
+`tools.camelCase`, `tools.pascalCase` are tools to change the case of the input string as their names show.
 
 `tools.replace(str: string, rpl: string = "", pattern: string, flags: string): string`: Create a [node's regular expression](https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/RegExp) from `pattern` and `flag`. Then apply it to `str`
 
@@ -174,4 +174,4 @@ USER brask
 
 `timestamp`: The second Unix timestamp of the moment the `task` command got executed.
 
-`pipe`: Result of previous step that set `pipe: PIPE`
+`pipe`: Result of the previous step that set `pipe: PIPE`
