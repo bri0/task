@@ -1,6 +1,6 @@
 {
   "name": "vask",
-  "version": "1.1.11",
+  "version": "1.1.13",
   "description": "Task controlling",
   "main": "dist/index.js",
   "types": "dist/index.d.js",
@@ -13,7 +13,9 @@
     "prepare": "npm run build; yarn run snyk-protect"
   },
   "keywords": [
-    "task", "vds", "veltra"
+    "task",
+    "vds",
+    "veltra"
   ],
   "engines": {
     "node": ">=8.0"
