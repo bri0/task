@@ -16,6 +16,6 @@
     "dist"
   ],
   "include": [
-    "package.json",
+    "package.json"
   ]
 }
