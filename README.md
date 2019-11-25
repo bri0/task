@@ -1,4 +1,4 @@
-# Brask
+# Vask (which was originally called Brask)
 
 ## System Requirements
 
@@ -30,5 +30,5 @@ Install the tooling via NPM. It should be installed globally.
 Using the terminal, start a new shell of your choice, and enter the following:
 
 ```shell
-npm i -g brask
+npm i -g vask
 ```
